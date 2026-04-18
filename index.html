@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trick Brain</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg,#74ebd5,#ACB6E5);
+      text-align:center;
+      padding:20px;
+      margin:0;
+    }
+
+    #app {
+      max-width:450px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.15);
+      animation:fadeIn 0.6s ease;
+    }
+
+    h1 {
+      color:#0077b6;
+      margin-bottom:10px;
+    }
+
+    #question {
+      font-size:20px;
+      font-weight:bold;
+      margin:20px 0;
+      padding:15px;
+      background:#f0f9ff;
+      border-radius:15px;
+      animation:pop 0.4s;
+    }
+
+    #answers {
+      background:#fafafa;
+      padding:10px;
+      border-radius:15px;
+    }
+
+    button {
+      width:100%;
+      padding:15px;
+      margin:10px 0;
+      border:none;
+      border-radius:15px;
+      background:linear-gradient(135deg,#4A90E2,#357ABD);
+      color:white;
+      font-size:16px;
+      transition:0.3s;
+      cursor:pointer;
+    }
+
+    button:hover { transform:scale(1.05); }
+    button:active { transform:scale(0.95); }
+
+    #feedback {
+      min-height:60px;
+      font-weight:bold;
+      font-size:18px;
+      margin-top:15px;
+    }
+
+    #nextBtn { background:#9b59b6; display:none; }
+    #shareBtn { background:#2ECC71; margin-top:20px; }
+
+    .modal {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.6);
+      z-index:1000;
+    }
+
+    .modal-content {
+      background:white;
+      padding:20px;
+      margin:10% auto;
+      width:90%;
+      max-width:500px;
+      border-radius:15px;
+      animation:pop 0.4s;
+      text-align:center;
+    }
+
+    .success { color:#2ECC71; animation:pop 0.5s; }
+    .error { color:#E74C3C; animation:shake 0.3s; }
+
+    @keyframes pop {
+      0% { transform:scale(0.8); opacity:0; }
+      100% { transform:scale(1); opacity:1; }
+    }
+    @keyframes shake {
+      0%,100% { transform:translateX(0); }
+      25% { transform:translateX(-5px); }
+      75% { transform:translateX(5px); }
+    }
+    @keyframes fadeIn {
+      from { opacity:0; }
+      to { opacity:1; }
+    }
+
+    #diplomaContent {
+      border: 8px solid gold;          /* cadre doré */
+      border-radius: 15px;
+      padding: 20px;
+      background: #fffdf5;             /* fond légèrement ivoire */
+      box-shadow: 0 8px 25px rgba(0,0,0,0.25); /* ombre douce */
+      font-family: 'Georgia', serif;   /* police élégante */
+      max-width: 95%;                  /* largeur fluide pour mobile */
+      margin: auto;
+    }
+
+    #diplomaContent h2 {
+      color: #b8860b;                  /* doré foncé pour le titre */
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+      font-size: 1.4rem;
+    }
+
+    #diplomaContent p {
+      font-size: 1.1rem;
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+
+    .diploma-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .diploma-buttons button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    #topBar {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 2000;
+    }
+
+    #settingsBtn {
+      background: #34495e;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+
+    #settingsBtn:hover { background:#2c3e50; transform:scale(1.1); }
+
+    #soundToggleBtn {
+      background:#2980b9;
+      color:white;
+      border:none;
+      border-radius:10px;
+      padding:12px;
+      font-size:16px;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    #soundToggleBtn:hover { background:#3498db; }
+    
+    /* 📱 Adaptation mobile */
+    @media(max-width:600px){
+      #settingsBtn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+      #soundToggleBtn {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+
+    @media(max-width:600px){
+      h1 { font-size:1.4rem; }
+      #question { font-size:1rem; }
+      button { font-size:18px; }
+      #app { padding:15px; }
+      .modal-content { margin:25% auto; }
+    }
+
+    /* 📱 Adaptation mobile */
+    @media(max-width:600px){
+      #diplomaContent {
+        padding: 15px;
+        border-width: 6px;             /* cadre plus fin sur mobile */
+      }
+      #diplomaContent h2 {
+        font-size: 1.2rem;
+      }
+      #diplomaContent p {
+        font-size: 1rem;
+      }
+      #diplomaContent img {
+        width: 60px;                   /* image réduite mais visible */
+        height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div id="topBar">
+      <button id="settingsBtn">⚙️</button>
+    </div>
+
+    <!-- Fenêtre modale des paramètres -->
+    <div id="settingsModal" class="modal">
+      <div class="modal-content">
+        <h2>⚙️ Paramètres du jeu</h2>
+        <button onclick="copyGameLink()">📋 Copier le lien du jeu</button>
+        <button id="soundToggleBtn">🔊 Son activé</button>
+        <button onclick="closeSettings()">❌ Fermer</button>
+      </div>
+    </div>
+
+  <div id="app">
+    <h1>🧩 Trick Brain</h1>
+    <h2 id="level">Niveau 1</h2>
+    <div id="question"></div>
+    <div id="answers"></div>
+    <div id="feedback"></div>
+
+    <button id="nextBtn">▶️ Jouer</button>
+    <button id="shareBtn">📤 Partager</button>
+  </div>
+
+  <!-- Diplôme -->
+  <div id="certificateModal" class="modal">
+    <div class="modal-content">
+      <h2>🎓 Générer ton diplôme</h2>
+      <input type="text" id="playerName" placeholder="Écrire votre nom" />
+      <button onclick="generateCertificate()">Suivant</button>
+    </div>
+  </div>
+
+  <div id="diplomaModal" class="modal">
+    <div class="modal-content" id="diplomaContent"></div>
+  </div>
+
+  <!-- Librairies externes -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    // Sons
+    const winSound = new Audio("sounds/win.mp3");
+    const loseSound = new Audio("sounds/lose.mp3");
+    const diploSound = new Audio("sounds/diplo.mp3");
+    const clickSound = new Audio("sounds/click.mp3");
+
+    const levels=[
+      {q:"Clique sur le bouton vert",a:["Bouton vert","Bouton bleu écrit vert","Aucun bouton vert"],c:"Bouton vert",exp:"Il fallait choisir le vrai bouton vert."},
+      {q:"Quel est le plus rapide ?",a:["Tortue rapide","Lumière","Voiture lente"],c:"Lumière",exp:"La lumière est la plus rapide."},
+      {q:"Trouve le froid",a:["Glace chaude","Feu froid","Glace"],c:"Glace",exp:"La glace est froide."},
+      {q:"Clique sur le plus petit",a:["Petit","MINUSCULE","micro"],c:"micro",exp:"Micro est le plus petit."},
+      {q:"Quel est correct ?",a:["2+2=5","2+2=4","2+2=22"],c:"2+2=4",exp:"C'est la bonne opération."},
+      {q:"Trouve le rond",a:["⚫","⬛ rond","cercle"],c:"⚫",exp:"C'est le seul vrai rond."},
+      {q:"Quel est vivant ?",a:["pierre","arbre","bois"],c:"arbre",exp:"Un arbre est vivant."},
+      {q:"Trouve le nombre pair",a:["3","5","4"],c:"4",exp:"4 est pair."},
+      {q:"Quel est lumineux ?",a:["nuit","lampe","soleil"],c:"soleil",exp:"Le soleil est le plus lumineux."},
+      {q:"Clique sur la bonne réponse",a:["mauvaise","pas ça","bonne réponse"],c:"bonne réponse",exp:"C'était évident 😏"},
+      // 51
+      { q:"Clique sur la réponse incorrecte", a:["incorrecte","fausse","pas correcte","correcte"], c:"correcte", exp:"La seule qui n’est pas incorrecte est 'correcte'." },
+
+      // 52
+      { q:"Choisis ce qui n'a pas de fin", a:["ligne","cercle","route","temps"], c:"temps", exp:"Le temps est infini, il n’a pas de fin." },
+
+      // 53
+      { q:"Quel mot est mal orthographié ?", a:["correct","incorect","juste","vrai"], c:"incorect", exp:"Le mot 'incorect' est mal orthographié, il manque un 'r'." },
+
+      // 54
+      { q:"Clique sur le plus léger", a:["plume","air","papier","pierre"], c:"air", exp:"L’air est intangible et plus léger que tout le reste." },
+
+      { q:"le père de Mary a quatre filles: Nana, Nene et Nini. Comment s'appelle la quatrième fille ?", a:["Nini","Nono","Mary","pas de réponse"], c:"Mary", exp:"Mary es aussi partie de ces quatres filles parce qu'on a dit le père de Mary." },
+
+      // 55
+      { q:"Choisis ce qui ne peut pas être vu", a:["vent","ombre","lumière","feu"], c:"vent", exp:"Le vent est invisible, on ne le voit pas directement." },
+
+      // 56
+      { q:"Quel est le plus rapide ?", a:["son","lumière","voiture","avion"], c:"lumière", exp:"La lumière se déplace plus vite que le son ou les machines." },
+
+      // 57
+      { q:"Clique sur ce qui n'est pas un nombre", a:["1","293","trois","4"], c:"trois", exp:"'Trois' est écrit en lettres, ce n’est pas un chiffre." },
+
+      // 58
+      { q:"Choisis le mot qui est une couleur", a:["gris","manger","courir","table"], c:"gris", exp:"'Gris' est une couleur, les autres sont des verbes ou noms." },
+
+      // 59
+      { q:"Quel est le contraire de 'froid' ?", a:["chaud","glace","feu","neige"], c:"chaud", exp:"Le contraire de 'froid' est 'chaud'." },
+
+      // 60
+      { q:"Clique sur le mot le plus long en lettres", a:["chat","chien","éléphant","rat"], c:"éléphant", exp:"'Éléphant' contient plus de lettres que les autres mots." },
+
+      // 61
+      { q:"Choisis ce qui est toujours devant toi mais invisible", a:["air","futur","ombre","vent"], c:"futur", exp:"Le futur est devant nous mais on ne peut pas le voir." },
+
+      // 62
+      { q:"Quel nombre est le plus petit ?", a:["0","-1","1","plus petit"], c:"-1", exp:"-1 est inférieur à 0, donc le plus petit." },
+
+      // 63
+      { q:"Clique sur la réponse qui n'est pas logique", a:["le feu brûle","l'eau mouille","la glace brûle","le vent souffle"], c:"la glace brûle", exp:"La glace ne brûle pas, c’est illogique." },
+
+      // 64
+      { q:"Choisis ce qui est vivant", a:["pierre","arbre","fer","eau"], c:"arbre", exp:"Un arbre est un être vivant, contrairement aux autres." },
+
+      // 65
+      { q:"Quel mot est un adjectif ?", a:["beau","courir","maison","manger"], c:"beau", exp:"'Beau' est un adjectif, les autres sont verbes ou noms." },
+
+      // 66
+      { q:"Clique sur ce qui est toujours en mouvement", a:["temps","chien","homme","soleil"], c:"temps", exp:"Le temps avance toujours, il est en mouvement constant." },
+
+      // 67
+      { q:"Choisis la réponse la plus silencieuse", a:["calme","musique","silence","la vue"], c:"La vue", exp:"La réponse la plus silencieuse est le regare (la vue)." },
+
+      // 68
+      { q:"Quel est le bon chiffre ?", a:["O","0","o","zéro"], c:"0", exp:"Le chiffre correct est '0', pas la lettre 'O'." },
+
+      // 69
+      { q:"Clique sur le mot qui n'est pas un animal", a:["chien","chat","lion","table"], c:"table", exp:"Une table n’est pas un animal." },
+
+      // 70
+      { q:"Choisis ce qui est éternel", a:["vie","temps","moment","richesse"], c:"temps", exp:"Le temps est considéré comme éternel." },
+
+      // 71
+      { q:"Quel mot contient une erreur ?", a:["erreur","ereur","faute","incorrect"], c:"errur", exp:"'Errur' est mal orthographié, il manque un 'e'." },
+
+      // 72
+      { q:"Clique sur ce qui est impossible", a:["nager le sables","voler sans conscience","manger dans l'eau","voler sans ailes"], c:"voler sans ailes", exp:"Voler sans ailes est impossible pour un humain." },
+
+      // 73
+      { q:"Choisis le plus grand", a:["univers","terre","pays","trés grand"], c:"univers", exp:"L’univers est plus grand que tout le reste." },
+
+      // 74
+      { q:"Quel mot est un nom ?", a:["courir","bleu","chien","rapide"], c:"chien", exp:"'Chien' est un nom commun, les autres sont adjectifs ou verbes." },
+
+      // 75
+      { q:"Clique sur ce qui disparaît la nuit", a:["soleil","lune","étoile","ombre"], c:"soleil", exp:"Le soleil disparaît la nuit." },
+
+      // 76
+      { q:"Choisis ce qui peut être cassé sans être touché", a:["silence","verre","bois","pierre"], c:"silence", exp:"Le silence peut être 'cassé' par un bruit." },
+
+      // 77
+      { q:"Quel est le plus fort ?", a:["vent","homme","machine","esprit"], c:"esprit", exp:"L’esprit est plus puissant que la force physique." },
+
+      // 78
+      { q:"Clique sur le mot qui fait trés mal", a:["danger","la mort","probleme","la vériter"], c:"la vériter", exp:"'la vériter' fait tellement mal aux gens, les autres sont des mots que certains veulent écouter sur leurs prochins." },
+
+      // 79
+      { q:"Choisis ce qui est toujours derrière toi", a:["passé","futur","derriere","temps"], c:"passé", exp:"Le passé est toujours derrière nous." },
+
+      // 80
+      { q:"Quel mot est le plus court ?", a:["court","trés petit","ccc","micro"], c:"ccc", exp:"'ccc' est le mot le plus court avec 3 seules lettre." },
+
+      // 81
+      { q:"Clique sur la réponse qui est fausse", a:["2+2=4","3+3=6","5+5=11","1+1=2"], c:"5+5=11", exp:"5+5=10, donc '11' est faux." },
+
+      // 82
+      { q:"Choisis ce qui ne change jamais", a:["temps","vérité","jour","nuit"], c:"vérité", exp:"La vérité reste constante, contrairement au temps ou au jour." },
+
+      // 83
+      { q:"Quel est le plus lumineux ?", a:["lune","étoile","soleil","lampe"], c:"soleil", exp:"Le soleil est la source la plus lumineuse." },
+
+      // 84
+      { q:"Clique sur le mot invisible", a:["visible","caché","invisible","vu"], c:"caché", exp:"Ce qui est 'caché' est invisible à nos yeux." },
+
+      // 85
+      { q:"Choisis ce qui est sans poids", a:["air","plume","l'eau","coton"], c:"air", exp:"L’air est intangible et sans poids perceptible." },
+
+      // 86
+      { q:"Quel mot est un contraire de 'rapide' ?", a:["trés lent","lent","speed","doucement"], c:"lent", exp:"Le contraire de 'rapide' est 'lent'." },
+
+      // 87
+      { q:"Clique sur la réponse correcte", a:["vrai","correcte","correct","sans erreur"], c:"correct", exp:"La bonne réponse est 'correct'." },
+
+      // 88
+      { q:"Choisis ce qui est toujours là mais invisible", a:["air","vent","ombre","lumière"], c:"air", exp:"L’air est partout mais invisible." },
+
+      // 89
+      { q:"Quel est le plus petit ?", a:["atome","cellule","organe","corps"], c:"atome", exp:"L’atome est plus petit que la cellule ou le corps." },
+
+      // 90
+      { q:"Clique sur ce qui n'a pas de début", a:["cercle","ligne","route","chemin"], c:"cercle", exp:"Un cercle n’a ni début ni fin." },
+
+      // 91
+      { q:"Choisis ce qui peut remplir une pièce sans prendre de place", a:["air","lumière","eau","feu"], c:"lumière", exp:"La lumière peut remplir une pièce entière sans occuper d’espace physique." },
+
+      // 92
+      { q:"Quel mot est une illusion ?", a:["rêve","réalité","objet","mur"], c:"rêve", exp:"Un rêve est une illusion, contrairement à la réalité ou aux objets." },
+
+      // 93
+      { q:"Clique sur ce qui est toujours en train de finir", a:["temps","vie","jour","nuit"], c:"temps", exp:"Le temps s’écoule constamment, il est toujours en train de finir." },
+
+      // 94
+      { q:"Choisis ce qui ne peut pas être arrêté", a:["temps","vent","eau","feu"], c:"temps", exp:"Le temps ne peut pas être arrêté, il continue toujours." },
+
+      // 95
+      { q:"Quel est le plus rapide sans bouger ?", a:["pensée","voiture","lumière","vent"], c:"pensée", exp:"La pensée voyage instantanément dans l’esprit, sans mouvement physique." },
+
+      // 96
+      { q:"Clique sur le mot le plus lourd (sens)", a:["amour","haine","mort","joie"], c:"mort", exp:"La mort est perçue comme le poids le plus lourd au sens symbolique." },
+
+      // 97
+      { q:"Choisis ce qui existe mais ne se voit pas", a:["air","pensée","ombre","lumière"], c:"pensée", exp:"Les pensées existent mais sont invisibles." },
+
+      // 98
+      { q:"Quel mot est toujours vrai ?", a:["mensonge","vérité","erreur","faux"], c:"vérité", exp:"La vérité est toujours vraie par définition." },
+
+      // 99
+      { q:"Clique sur ce qui ne peut pas être partagé avec femmes", a:["secret","pain","eau","argent"], c:"secret", exp:"Un secret ne peut pas être partagé sans cesser d’être un secret." },
+
+      // 100
+      { q:"Choisis la réponse la plus intelligente", a:["celle-ci","celle-là","aucune","toutes"], c:"aucune", exp:"La réponse 'aucune' est la plus intelligente car elle remet en question toutes les autres." },
+      
+      // 31
+      { q:"Clique sur ce qui n'existe pas", a:["ombre","rêve","vide absolu","licorne réelle"], c:"licorne réelle", exp:"Les licornes réelles n’existent pas, contrairement aux autres notions." },
+
+      // 32
+      { q:"Quel mot est vraiment écrit en minuscule ?", a:["MINUSCULE","ECRIRT EN MINUSCULE","minuscule","miNusCule"], c:"minuscule", exp:"Seul 'minuscule' est écrit entièrement en lettres minuscules." },
+
+      // 33
+      { q:"Choisis ce qui est toujours vrai", a:["le feu est froid","femme voir l'argent","l'eau brûle","la nuit est soleil"], c:"femme voir l'argent", exp:"L’opération (femme voir l'argent) est une vérité universelle." },
+
+      // 34
+      { q:"Clique sur la réponse la plus lente à lire", a:["trés lent","lent","très très très lent","doucement"], c:"très très très lent", exp:"La phrase 'très très très lent' prend plus de temps à lire." },
+
+      // 35
+      { q:"Quel mot contient le plus de lettres ?", a:["chat","éléphant","hippopotame","lion"], c:"hippopotame", exp:"'Hippopotame' est le mot le plus long en nombre de lettres." },
+
+      // 36
+      { q:"Choisis ce qui est invisible", a:["air","eau","soleil","bois"], c:"air", exp:"L’air est invisible à l’œil nu, contrairement aux autres." },
+
+      // 37
+      { q:"Clique sur le contraire de 'haut'", a:["haut","milieu","bas","côté"], c:"bas", exp:"Le contraire de 'haut' est 'bas'." },
+
+      // 38
+      { q:"Quel nombre est impair ?", a:["2","4","6","7"], c:"7", exp:"7 est impair, les autres sont pairs." },
+
+      // 39
+      { q:"Choisis la réponse qui ment", a:["je dis la vérité","je mens","je suis faux","je ne mens pas"], c:"je mens", exp:"La phrase 'je mens' est un mensonge par définition." },
+
+      // 40
+      { q:"Clique sur le mot le plus lourd", a:["plume","air","roche","papier"], c:"roche", exp:"La roche est plus lourde que plume, air ou papier." },
+
+      // 41
+      { q:"Quel est le bon ?", a:["vrai","incorrect","bon","correct"], c:"correct", exp:"La réponse 'correct' est la seule qui signifie 'bon'." },
+
+      // 42
+      { q:"Choisis ce qui disparaît quand on le nomme", a:["silence","ombre","lumière","vent"], c:"silence", exp:"Le silence disparaît dès qu’on parle ou qu’on le nomme." },
+
+      // 43
+      { q:"Clique sur le premier menteur du monde", a:["homme","femme","garçon","fille"], c:"garçon", exp:"les 'garçon' sont les premiers menteures du monde." },
+
+      // 44
+      { q:"Quel est le plus logique ?", a:["chien miaule","poisson nage","oiseau rampe","serpent vole"], c:"poisson nage", exp:"Il est logique qu’un poisson nage, les autres sont faux." },
+
+      // 45
+      { q:"Choisis ce qui monte mais ne descend jamais", a:["âge","balle","pluie","soleil"], c:"âge", exp:"L’âge augmente toujours, il ne redescend jamais." },
+
+      // 46
+      { q:"Clique sur le nombre écrit correctement", a:["1O","10","dix","l0"], c:"10", exp:"'10' est le nombre écrit correctement en chiffres." },
+
+      // 47
+      { q:"Quel mot est un verbe ?", a:["manger","table","bleu","rapide"], c:"manger", exp:"'Manger' est un verbe, les autres sont noms ou adjectifs." },
+
+      // 48
+      { q:"Choisis la réponse qui n'a aucun sens", a:["carré rond","triangle","cercle","rectangle"], c:"carré rond", exp:"Un 'carré rond' est une contradiction et n’a aucun sens." },
+
+      // 49
+      { q:"Clique sur le mot le plus lumineux", a:["nuit","ombre","soleil","gris"], c:"soleil", exp:"Le soleil est la source la plus lumineuse." },
+
+      // 50
+      { q:"Choisis la vraie vérité", a:["tout est faux","rien n'est vrai","quelque chose est vrai","tout est vrai"], c:"quelque chose est vrai", exp:"Il existe toujours au moins une vérité, donc 'quelque chose est vrai'." },
+
+      // 101
+        { q:"Clique sur la réponse qui n’est pas comme les autres", a:["chien","chat","lion","table"], c:"table", exp:"La table n’est pas un animal, contrairement aux autres." },
+
+        // 102
+        { q:"Choisis ce qui est toujours faux", a:["mensonge","vérité","réalité","fait"], c:"mensonge", exp:"Un mensonge est par définition toujours faux." },
+        
+        { q:"Choisis ce qui est toujours faux", a:["mensonge","vérité","réalité","fait"], c:"mensonge", exp:"Un mensonge est par définition toujours faux." },
+
+        // 103
+        { q:"Quel mot contient exactement 4 lettres ?", a:["trois","quatre","cinq","4 lettres"], c:"cinq", exp:"Le mot 'cinq' est composé de 4 lettres." },
+
+        // 104
+        { q:"Clique sur ce qui ne peut pas exister", a:["carré rond","triangle","cercle","rectangle"], c:"carré rond", exp:"Un 'carré rond' est une contradiction impossible." },
+
+        // 105
+        { q:"Choisis ce qui est plus rapide que tout", a:["lumière","pensée","son","vent"], c:"pensée", exp:"La pensée est instantanée dans l’esprit, plus rapide que la lumière." },
+
+        // 106
+        { q:"Quel mot est toujours mal écrit ?", a:["mal écrit","incorrect","faux","erreur"], c:"mal écrit", exp:"Le mot 'mal écrit' est toujours mal écrit par définition." },
+
+        // 107
+        { q:"Clique sur ce qui ne change jamais même si tout change", a:["temps","vérité","monde","jour"], c:"vérité", exp:"La vérité reste constante, même si tout le reste change." },
+
+        // 108
+        { q:"Choisis la réponse qui est une question", a:["quoi","réponse","question","pourquoi ?"], c:"pourquoi ?", exp:"'Pourquoi ?' est une vraie question, les autres sont des mots." },
+
+        // 109
+        { q:"Quel est le contraire de rien ?", a:["tout","vide","aucun","zéro"], c:"tout", exp:"Le contraire de 'rien' est 'tout'." },
+
+        // 110
+        { q:"Clique sur ce qui peut être entendu mais pas vu", a:["son","lumière","ombre","image"], c:"son", exp:"Le son s’entend mais ne se voit pas." },
+
+        // 111
+        { q:"Choisis le mot le plus lourd en sens", a:["amour","joie","tristesse","mort"], c:"mort", exp:"La mort est perçue comme le poids le plus lourd au sens symbolique." },
+
+        // 112
+        { q:"Quel mot disparaît quand on le dit ?", a:["silence","parole","mot","voix"], c:"silence", exp:"Le silence disparaît dès qu’on parle." },
+
+        // 113
+        { q:"Clique sur la réponse qui est une contradiction", a:["feu chaud","glace froide","silence bruyant","eau liquide"], c:"silence bruyant", exp:"Un 'silence bruyant' est une contradiction." },
+
+        // 114
+        { q:"Choisis ce qui est toujours devant mais jamais atteint", a:["futur","présent","passé","temps"], c:"futur", exp:"Le futur est toujours devant nous mais jamais atteint." },
+
+        // 115
+        { q:"Quel mot contient une erreur volontaire ?", a:["erreur","fautee","correct","juste"], c:"fautee", exp:"'Fautee' est écrit avec une faute volontaire." },
+
+        // 116
+        { q:"Clique sur ce qui n’a pas de poids mais existe", a:["pensée","carton","bois","fer"], c:"pensée", exp:"Les pensées existent mais n’ont pas de poids." },
+
+        // 117
+        { q:"Choisis ce qui peut être cassé sans bruit", a:["silence","verre","mur","bois"], c:"silence", exp:"Le silence peut être 'cassé' par un bruit." },
+
+        // 118
+        { q:"Quel est le plus petit concept ?", a:["atome","idée","cellule","grain"], c:"idée", exp:"Une idée est abstraite et plus petite qu’un objet physique." },
+
+        // 119
+        { q:"Clique sur la réponse qui est une illusion", a:["rêve","mur","table","porte"], c:"rêve", exp:"Un rêve est une illusion, contrairement aux objets réels." },
+
+        // 120
+        { q:"Choisis ce qui ne peut pas être contrôlé totalement", a:["temps","machine","objet","outil"], c:"temps", exp:"Le temps ne peut pas être contrôlé, il avance toujours." },
+
+        // 121
+        { q:"Quel mot est toujours correct ?", a:["correct","faux","erreur","incorrect"], c:"correct", exp:"Le mot 'correct' est toujours correct par définition." },
+
+        // 122
+        { q:"Clique sur ce qui peut exister sans matière", a:["pensée","pierre","eau","fer"], c:"pensée", exp:"Une pensée existe sans matière physique." },
+
+        // 123
+        { q:"Choisis ce qui peut être vu mais n'existe pas vraiment", a:["illusion","objet","mur","table"], c:"illusion", exp:"Une illusion peut être vue mais n’existe pas réellement." },
+
+        // 124
+        { q:"Quel est le plus rapide dans l'esprit ?", a:["pensée","lumière","son","vent"], c:"pensée", exp:"La pensée est instantanée dans l’esprit." },
+
+        // 125
+        { q:"Clique sur la réponse qui est toujours en train de disparaître", a:["temps","l'air","mur","bois"], c:"temps", exp:"Le temps s’écoule et disparaît constamment." },
+
+        // 126
+        { q:"Choisis ce qui est infini", a:["univers","temps","route","ligne"], c:"temps", exp:"Le temps est considéré comme infini." },
+
+        // 127
+        { q:"Quel mot est paradoxal ?", a:["silence bruyant","feu chaud","eau froide","air invisible"], c:"silence bruyant", exp:"Un 'silence bruyant' est un paradoxe." },
+
+        // 128
+        { q:"Clique sur ce qui ne peut pas être vu directement", a:["air","vent","ombre","lumière"], c:"vent", exp:"Le vent ne peut pas être vu directement, seulement ressenti." },
+
+        // 129
+        { q:"Choisis ce qui existe seulement dans l’esprit", a:["idée","connaissance","eau","fer"], c:"idée", exp:"Une idée existe uniquement dans l’esprit." },
+
+        // 130
+        { q:"Quel mot est une vérité absolue ?", a:["vérité","mensonge","doute","erreur"], c:"vérité", exp:"La vérité est une vérité absolue." },
+
+        // 131
+        { q:"Clique sur ce qui ne peut pas être mesuré parfaitement", a:["temps","distance","poids","taille"], c:"temps", exp:"Le temps ne peut pas être mesuré parfaitement, il s’écoule sans arrêt." },
+
+        // 132
+        { q:"Choisis ce qui ne peut pas être vu mais ressenti", a:["vent","amitiés","bois","décision"], c:"vent", exp:"Le vent ne se voit pas mais on le ressent." },
+
+        // 133
+        { q:"Quel mot est une abstraction ?", a:["amour","table","chaise","porte"], c:"amour", exp:"L’amour est une abstraction, contrairement aux objets concrets." },
+
+        // 134
+        { q:"Clique sur la réponse qui est toujours en mouvement", a:["temps","mur","table","roche"], c:"temps", exp:"Le temps est toujours en mouvement." },
+
+        // 135
+        { q:"Choisis ce qui est toujours en train de commencer", a:["instant","temps","moment","la vie"], c:"instant", exp:"Chaque instant est toujours en train de commencer." },
+
+        // 136
+        { q:"Quel mot est le plus abstrait ?", a:["pensée","objet","désoler","pierre"], c:"pensée", exp:"La pensée est abstraite, contrairement aux objets physiques." },
+
+        // 137
+        { q:"Clique sur ce qui n’a pas de forme", a:["air","pierre","bois","fer"], c:"air", exp:"L’air n’a pas de forme définie." },
+
+        // 138
+        { q:"Choisis ce qui ne peut pas être arrêté même un instant", a:["temps","vent","eau","feu"], c:"temps", exp:"Le temps ne peut pas être arrêté." },
+
+        // 139
+        { q:"Quel mot représente tout et rien à la fois ?", a:["vide","tout","zéro","univers"], c:"vide", exp:"Le vide peut représenter à la fois tout et rien." },
+
+        // 140
+        { q:"Clique sur la réponse qui dépasse la logique", a:["paradoxe","vérité","fait","réalité"], c:"paradoxe", exp:"Un paradoxe dépasse la logique car il contient une contradiction." },
+
+        // 31
+        { q:"Choisis le plus grand nombre", a:["15","20","25","30"], c:"30", exp:"Parmi ces nombres, 30 est le plus grand." },
+
+        // 32
+        { q:"Quel est le plus rapide ?", a:["train","avion","fusée","vélo"], c:"fusée", exp:"La fusée est plus rapide que le train, l’avion ou le vélo." },
+
+        // 33
+        { q:"Trouve le mot sans voyelle", a:["chat","crbt","lion","oiseau"], c:"crbt", exp:"Le mot 'crbt' ne contient aucune voyelle." },
+
+        // 34
+        { q:"Choisis le plus lourd métal", a:["fer","or","plomb","mercure"], c:"plomb", exp:"Le plomb est plus dense et plus lourd que les autres métaux proposés." },
+
+        // 35
+        { q:"Quel est le nombre premier ?", a:["9","15","17","21"], c:"17", exp:"17 est un nombre premier car il n’a que deux diviseurs : 1 et lui-même." },
+
+        // 36
+        { q:"Trouve l’animal marin", a:["chien","requin","chat","tigre"], c:"requin", exp:"Le requin est un animal marin, les autres vivent sur terre." },
+
+        // 37
+        { q:"Choisis le plus chaud astre", a:["lune","soleil","terre","mars"], c:"soleil", exp:"Le soleil est l’astre le plus chaud parmi ces choix." },
+
+        // 38
+        { q:"Quel mot est écrit en majuscule ?", a:["majuscule","MAJUSCULE","Majuscule","maJusCule"], c:"MAJUSCULE", exp:"Seul 'MAJUSCULE' est écrit entièrement en lettres majuscules." },
+
+        // 39
+        { q:"Trouve le carré parfait", a:["12","16","20","22"], c:"16", exp:"16 est un carré parfait car 4 × 4 = 16." },
+
+        // 40
+        { q:"Choisis le plus petit nombre", a:["-1","0","1","petit"], c:"-1", exp:"-1 est inférieur à 0, donc c’est le plus petit." },
+
+        // 41
+        { q:"Quel est un fruit ?", a:["carotte","banane","pomme de terre","chou"], c:"banane", exp:"La banane est un fruit, les autres sont des légumes." },
+
+        // 42
+        { q:"Trouve le mot palindrome", a:["radar","chat","soleil","pierre"], c:"radar", exp:"'Radar' se lit de la même façon dans les deux sens, c’est un palindrome." },
+
+        // 43
+        { q:"Choisis le plus rapide calcul", a:["2+2","10-5","3x3","100/25"], c:"2+2", exp:"2+2 est le calcul le plus simple et rapide à effectuer." },
+
+        // 44
+        { q:"Quel est liquide ?", a:["glace","vapeur","eau","bois"], c:"eau", exp:"L’eau est liquide, contrairement à la glace, la vapeur ou le bois." },
+
+        // 45
+        { q:"Trouve le mot le plus long", a:["court","longueur","extraordinaire","mot long"], c:"extraordinaire", exp:"'Extraordinaire' est le mot le plus long en nombre de lettres." },
+
+        // 46
+        { q:"Choisis le plus rapide animal terrestre", a:["cheval","lion","guépard","éléphant"], c:"guépard", exp:"Le guépard est l’animal terrestre le plus rapide." },
+
+        // 47
+        { q:"Quel est un continent ?", a:["Afrique","Paris","Togo","terre"], c:"Afrique", exp:"L’Afrique est un continent, les autres sont des villes ou pays." },
+
+        // 48
+        { q:"Trouve le nombre impair", a:["2","impair","6","9"], c:"9", exp:"9 est impair, les autres sont des nombres pairs et mot." },
+
+        // 49
+        { q:"Choisis le plus lumineux objet", a:["lampe","bougie","soleil","étoile"], c:"soleil", exp:"Le soleil est plus lumineux que les autres sources de lumière." },
+
+        // 50
+        { q:"Quel est un langage de programmation ?", a:["Python","Français","Anglais","Espagnol"], c:"Python", exp:"Python est un langage de programmation, les autres sont des langues parlées." },
+
+        // 51
+        { q:"Quel est un nombre premier ?", a:["51","53","55","57"], c:"53", exp:"53 est premier car il n’a que deux diviseurs : 1 et lui-même." },
+
+        // 52
+        { q:"Trouve le carré parfait", a:["81","82","83","84"], c:"81", exp:"81 est un carré parfait car 9 × 9 = 81." },
+
+        // 53
+        { q:"Choisis l’animal qui vole", a:["poule","aigle","chat","chien"], c:"aigle", exp:"L’aigle est un oiseau qui vole, contrairement aux autres." },
+
+        // 54
+        { q:"Quel est un gaz ?", a:["oxygène","eau","l'air","acide"], c:"oxygène", exp:"L’oxygène est un gaz, les autres sont solides ou liquides." },
+
+        // 55
+        { q:"Trouve le mot palindrome", a:["kayak","soleil","maison","route"], c:"kayak", exp:"'Kayak' se lit de la même façon dans les deux sens." },
+
+        // 56
+        { q:"Choisis le plus petit nombre", a:["-500","0","1","0000"], c:"-5", exp:"-500 est inférieur à 0, donc c’est le plus petit." },
+
+        // 57
+        { q:"Quel est un continent ?", a:["Europe","Paris","Italie","monde"], c:"Europe", exp:"L’Europe est un continent, les autres sont des villes ou pays." },
+
+        // 58
+        { q:"Trouve le nombre impair", a:["20","22","25","28"], c:"25", exp:"25 est impair, les autres sont pairs." },
+
+        // 59
+        { q:"Choisis le plus rapide transport", a:["bus","train","avion","fusée"], c:"fusée", exp:"La fusée est plus rapide que tous les autres moyens de transport." },
+
+        // 60
+        { q:"Quel est un langage informatique ?", a:["Java","Espagnol","Français","Latin"], c:"Java", exp:"Java est un langage informatique, les autres sont des langues parlées." },
+
+        // 61
+        { q:"Trouve le plus lourd métal", a:["aluminium","plomb","argent","cuivre"], c:"plomb", exp:"Le plomb est plus dense et plus lourd que les autres métaux proposés." },
+
+        // 62
+        { q:"Choisis le mot écrit en majuscule", a:["majuscule","Majuscule","MAJUSCULE","majusCule"], c:"MAJUSCULE", exp:"Seul 'MAJUSCULE' est écrit entièrement en lettres majuscules." },
+
+        // 63
+        { q:"Quel est un fruit ?", a:["tomate","carotte","pomme de terre","chou"], c:"tomate", exp:"La tomate est un fruit, les autres sont des légumes." },
+
+        // 64
+        { q:"Trouve le nombre divisible par 3", a:["19","21","22","25"], c:"21", exp:"21 est divisible par 3 car 3 × 7 = 21." },
+
+        // 65
+        { q:"Choisis le plus lumineux astre", a:["lune","mars","soleil","terre"], c:"soleil", exp:"Le soleil est l’astre le plus lumineux." },
+
+        // 66
+        { q:"Quel est un animal marin ?", a:["requin","lion","chat","chien"], c:"requin", exp:"Le requin vit dans la mer, les autres vivent sur terre." },
+
+        // 67
+        { q:"Trouve le mot le plus long", a:["court","longueur","extraordinaire","mot"], c:"extraordinaire", exp:"'Extraordinaire' est le mot le plus long en nombre de lettres." },
+
+        // 68
+        { q:"Choisis le nombre pair", a:["31","33","34","35"], c:"34", exp:"34 est pair, les autres sont impairs." },
+
+        // 69
+        { q:"Quel est un gaz noble ?", a:["argon","oxygène","hydrogène","azote"], c:"argon", exp:"L’argon est un gaz noble, les autres ne le sont pas." },
+
+        // 70
+        { q:"Trouve le carré parfait", a:["99","100","101","102"], c:"100", exp:"100 est un carré parfait car 10 × 10 = 100." },
+
+        // 71
+        { q:"Choisis le plus rapide animal terrestre", a:["cheval","lion","guépard","éléphant"], c:"guépard", exp:"Le guépard est l’animal terrestre le plus rapide." },
+
+        // 72
+        { q:"Quel est un langage de programmation ?", a:["Python","Français","Espagnol","Italien"], c:"Python", exp:"Python est un langage de programmation, les autres sont des langues parlées." },
+
+        // 73
+        { q:"Trouve le nombre premier", a:["29","30","31","32"], c:"31", exp:"31 est premier car il n’a que deux diviseurs : 1 et lui-même." },
+
+        // 74
+        { q:"Choisis l’animal qui pond des œufs", a:["chien","chat","poule","cheval"], c:"poule", exp:"La poule pond des œufs, contrairement aux autres animaux cités." },
+
+        // 75
+        { q:"Quel est un liquide ?", a:["glace","vapeur","eau","bois"], c:"eau", exp:"L’eau est liquide, la glace est solide et la vapeur est gazeuse." },
+
+        // 76
+        { q:"Trouve le mot palindrome", a:["radar","soleil","maison","route"], c:"radar", exp:"'Radar' se lit de la même façon dans les deux sens." },
+
+        // 77
+        { q:"Choisis le plus petit nombre", a:["-10","-5","0","5"], c:"-10", exp:"-10 est inférieur à -5, donc c’est le plus petit." },
+
+        // 78
+        { q:"Quel est un continent ?", a:["Afrique","Paris","Italie","Lomé"], c:"Afrique", exp:"L’Afrique est un continent, les autres sont des villes ou pays." },
+
+        // 79
+        { q:"Trouve le nombre impair", a:["40","42","45","48"], c:"45", exp:"45 est impair, les autres sont pairs." },
+
+        // 80
+        { q:"Choisis le plus rapide transport", a:["train","avion","fusée","voiture"], c:"fusée", exp:"La fusée est plus rapide que tous les autres moyens de transport." },
+
+        // 81
+        { q:"Quel est un langage informatique ?", a:["C++","Espagnol","Français","Latin"], c:"C++", exp:"C++ est un langage informatique, les autres sont des langues parlées." },
+
+        // 82
+        { q:"Trouve le plus lourd métal", a:["fer","plomb","argent","cuivre"], c:"plomb", exp:"Le plomb est plus dense et plus lourd que les autres métaux proposés." },
+
+        // 83
+        { q:"Choisis le mot écrit en majuscule", a:["majuscule","Majuscule","MAJUSCULE","majusCule"], c:"MAJUSCULE", exp:"Seul 'MAJUSCULE' est écrit entièrement en lettres majuscules." },
+
+        // 84
+        { q:"Quel est un fruit ?", a:["banane","carotte","pomme de terre","chou"], c:"banane", exp:"La banane est un fruit, les autres sont des légumes." },
+
+        // 85
+        { q:"Trouve le nombre divisible par 5", a:["21","25","27","29"], c:"25", exp:"25 est divisible par 5 car 5 × 5 = 25." },
+
+        // 86
+        { q:"Choisis le plus lumineux astre", a:["lune","mars","soleil","terre"], c:"soleil", exp:"Le soleil est l’astre le plus lumineux." },
+
+        // 87
+        { q:"Quel est un animal marin ?", a:["requin","lion","chat","chien"], c:"requin", exp:"Le requin vit dans la mer, les autres vivent sur terre." },
+
+        // 88
+        { q:"Trouve le mot le plus long", a:["court","longueur","extraordinaire","mot"], c:"extraordinaire", exp:"'Extraordinaire' est le mot le plus long en nombre de lettres." },
+
+        // 89
+        { q:"Choisis le nombre pair", a:["51","53","54","55"], c:"54", exp:"54 est pair, les autres sont impairs." },
+
+        // 90
+        { q:"Quel est un gaz noble ?", a:["hélium","oxygène","hydrogène","azote"], c:"hélium", exp:"L’hélium est un gaz noble, les autres ne le sont pas." },
+
+        // 91
+        { q:"Trouve le carré parfait", a:["120","121","122","123"], c:"121", exp:"121 est un carré parfait car 11 × 11 = 121." },
+
+        // 92
+        { q:"Choisis le plus rapide animal terrestre", a:["cheval","lion","guépard","éléphant"], c:"guépard", exp:"Le guépard est l’animal terrestre le plus rapide, pouvant atteindre plus de 100 km/h." },
+
+        // 93
+        { q:"Quel est un langage de programmation ?", a:["JavaScript","Français","Espagnol","Italien"], c:"JavaScript", exp:"JavaScript est un langage de programmation utilisé pour le web, les autres sont des langues parlées." },
+
+        // 94
+        { q:"Trouve le nombre premier", a:["37","38","39","40"], c:"37", exp:"37 est premier car il n’a que deux diviseurs : 1 et lui-même." },
+
+        // 95
+        { q:"Choisis l’animal qui pond des œufs", a:["chien","chat","poule","cheval"], c:"poule", exp:"La poule pond des œufs, contrairement aux autres animaux cités." },
+
+        // 96
+        { q:"Quel est un liquide ?", a:["glace","vapeur","eau","bois"], c:"eau", exp:"L’eau est liquide, la glace est solide et la vapeur est gazeuse." },
+
+        // 97
+        { q:"Trouve le mot palindrome", a:["radar","soleil","maison","route"], c:"radar", exp:"'Radar' se lit de la même façon dans les deux sens, c’est un palindrome." },
+
+        // 141
+        { q:"Combien de mots y a-t-il dans cette question ?", a:["6","7","8","9"], c:"7", exp:"La phrase contient 7 mots distincts." },
+
+        // 142
+        { q:"Clique sur la réponse qui contient exactement 2 voyelles", a:["chat","bleu","gris","2 voyelles"], c:"bleu", exp:"Le mot 'bleu' contient deux voyelles : e et u." },
+
+        // 143
+        { q:"Choisis la réponse qui est la plus proche de toi", a:["écran","main","œil","cerveau"], c:"cerveau", exp:"Ton cerveau est toujours le plus proche de toi." },
+
+        // 144
+        { q:"Quel mot a ses lettres dans l’ordre alphabétique ?", a:["abc","cab","bac","mnp"], c:"abc", exp:"'abc' est écrit dans l’ordre alphabétique." },
+
+        // 145
+        { q:"Clique sur la réponse qui est fausse... sauf si tu te trompes", a:["celle-ci","celle-là","aucune","toutes"], c:"aucune", exp:"La réponse 'aucune' est la plus logique car aucune n’est correcte." },
+
+        // 146
+        { q:"Choisis le mot qui contient une lettre doublée", a:["chat","balle","double","porte"], c:"balle", exp:"Le mot 'balle' contient deux 'l'." },
+
+        // 147
+        { q:"Quel mot a le plus de voyelles ?", a:["oiseau","chat","mur","pain"], c:"oiseau", exp:"'Oiseau' contient 4 voyelles, plus que les autres." },
+
+        // 148
+        { q:"Clique sur la réponse qui ne peut pas être lue à voix haute", a:["silence","vide","...","rien"], c:"...", exp:"Les points de suspension ne se lisent pas à voix haute." },
+
+        // 149
+        { q:"Choisis la réponse qui est identique à elle-même", a:["miroir","copie","original","même"], c:"même", exp:"Le mot 'même' signifie identique à lui-même." },
+
+        // 150
+        { q:"Quel mot est le plus au milieu de l’alphabet ?", a:["m","n","o","l"], c:"n", exp:"La lettre 'n' est la plus proche du milieu de l’alphabet." },
+
+        // 151
+        { q:"Clique sur la réponse qui dépend de toi", a:["réponse","choix","jeu","question"], c:"choix", exp:"Ton choix dépend directement de toi." },
+
+        // 152
+        { q:"Choisis le mot qui contient toutes ses lettres différentes", a:["lettre","unique","balle","pomme"], c:"unique", exp:"Le mot 'unique' n’a aucune lettre répétée." },
+
+        // 153
+        { q:"Quel mot est un palindrome ?", a:["radar","chat","chien","porte"], c:"radar", exp:"'Radar' se lit de la même façon dans les deux sens." },
+
+        // 154
+        { q:"Clique sur la réponse qui existe seulement si tu penses", a:["idée","cors","eau","air"], c:"idée", exp:"Une idée existe uniquement dans l’esprit." },
+
+        // 155
+        { q:"Choisis la réponse qui est la plus abstraite", a:["table","conscience","pensée","porte"], c:"pensée", exp:"La pensée est abstraite, contrairement aux objets physiques." },
+
+        // 156
+        { q:"Quel mot change de sens selon comment tu le lis ?", a:["sens","mot","lire","texte"], c:"sens", exp:"Le mot 'sens' peut signifier direction ou signification." },
+
+        // 157
+        { q:"Clique sur la réponse qui n’a aucune lettre commune avec 'chat'", a:["chien","mur","table","rat"], c:"mur", exp:"Le mot 'mur' ne partage aucune lettre avec 'chat'." },
+
+        // 158
+        { q:"Choisis la réponse la plus instable", a:["équilibre","hasard","calme","fixe"], c:"hasard", exp:"Le hasard est imprévisible et instable." },
+
+        // 159
+        { q:"Quel mot contient le plus de consonnes ?", a:["crypt","oiseau","chat","eau"], c:"crypt", exp:"'Crypt' contient 5 consonnes et aucune voyelle." },
+
+        // 160
+        { q:"Clique sur la réponse qui est un symbole et non un mot", a:["&","et","plus","mot"], c:"&", exp:"'&' est un symbole, les autres sont des mots." },
+
+        // 161
+        { q:"Choisis la réponse qui peut être vraie et fausse en même temps", a:["paradoxe","vérité","mensonge","fait"], c:"paradoxe", exp:"Un paradoxe peut être vrai et faux simultanément." },
+
+        // 162
+        { q:"Quel mot contient une lettre muette ?", a:["fils","chat","mur","pain"], c:"fils", exp:"Dans 'fils', le 's' final est muet." },
+
+        // 163
+        { q:"Clique sur la réponse qui change selon la langue", a:["mot","chien","langue","nom"], c:"chien", exp:"Le mot 'chien' change selon la langue (dog en anglais)." },
+
+        // 164
+        { q:"Choisis la réponse qui n’a pas de son propre", a:["lettre","silence","mot","phrase"], c:"silence", exp:"Le silence est l’absence de son." },
+
+        // 165
+        { q:"Quel mot peut être lu de gauche à droite et rester logique ?", a:["oui","non","chat","sùr"], c:"oui", exp:"'Oui' est logique et cohérent lu normalement." },
+
+        // 166
+        { q:"Clique sur la réponse qui dépend du contexte", a:["mot","sens","lettre","texte"], c:"sens", exp:"Le 'sens' dépend du contexte (direction ou signification)." },
+
+        // 167
+        { q:"Choisis le mot le plus ambigu", a:["sens","table","magie","porte"], c:"sens", exp:"Le mot 'sens' est ambigu car il a plusieurs significations." },
+
+        // 168
+        { q:"Quel mot peut désigner plusieurs choses ?", a:["clé","beaucoup","magasin","stockage"], c:"clé", exp:"Une 'clé' peut être un objet, une solution ou un symbole." },
+
+        // 169
+        { q:"Clique sur la réponse qui n’est pas une chose physique", a:["idée","l'eau","terre","fer"], c:"idée", exp:"Une idée est abstraite, les autres sont physiques." },
+
+        // 170
+        { q:"Choisis la réponse qui dépend du temps", a:["maintenant","toujours","jamais","hier"], c:"maintenant", exp:"'Maintenant' dépend du moment présent." },
+
+        // 171
+        { q:"Quel mot est le plus court à prononcer ?", a:["a","long","mot","phrase"], c:"a", exp:"'a' est le plus court à prononcer." },
+
+        // 172
+        { q:"Clique sur la réponse qui est une unité", a:["mètre","grand","petit","long"], c:"mètre", exp:"Le mètre est une unité de mesure." },
+
+        // 173
+        { q:"Choisis le mot qui change selon ton point de vue", a:["gauche","droite","devant","derrière"], c:"devant", exp:"Ce qui est 'devant' dépend de ton orientation." },
+
+        // 174
+        { q:"Quel mot est le plus neutre ?", a:["objet","amour","haine","joie"], c:"objet", exp:"Un objet est neutre, contrairement aux émotions." },
+
+        // 175
+        { q:"Clique sur la réponse qui dépend de la perception", a:["couleur","pierre","bois","fer"], c:"couleur", exp:"La perception des couleurs dépend de l’œil humain." },
+
+        // 176
+        { q:"Choisis la réponse qui est une convention", a:["heure","temps","jour","nuit"], c:"heure", exp:"L’heure est une convention humaine pour mesurer le temps." },
+
+        // 177
+        { q:"Quel mot peut être silencieux et bruyant ?", a:["musique","silence","bruit","son"], c:"musique", exp:"La musique peut être douce (silencieuse) ou forte (bruyante)." },
+
+        // 178
+        { q:"Clique sur la réponse qui est relative", a:["grand","table","fils","porte"], c:"grand", exp:"La notion de 'grand' est relative selon la comparaison." },
+
+        // 179
+        { q:"Choisis la réponse qui dépend d’une règle humaine", a:["langue","air","eau","feu"], c:"langue", exp:"Les langues sont des règles humaines, les autres sont naturels." },
+
+        // 180
+        { q:"Quel mot change selon la culture ?", a:["politesse","décision","intéligence","silence"], c:"politesse", exp:"La politesse varie selon les cultures." },
+
+        // 181
+        { q:"Clique sur la réponse qui est une construction mentale", a:["nombre","pierre","choix","cerveau"], c:"nombre", exp:"Un nombre est une construction abstraite créée par l’esprit, contrairement aux objets physiques." },
+
+        // 182
+        { q:"Choisis la réponse qui peut être infinie sans être physique", a:["suite","ligne","route","cercle"], c:"suite", exp:"Une suite mathématique peut être infinie sans exister physiquement." },
+
+        // 183
+        { q:"Quel mot est le plus dépendant du langage ?", a:["mot","écrit","eau","air"], c:"mot", exp:"Le mot est une unité de langage, il dépend entièrement de la langue." },
+
+        // 184
+        { q:"Clique sur la réponse qui est une abstraction pure", a:["justice","table","injustice","maniers"], c:"justice", exp:"La justice est une abstraction, contrairement aux objets concrets." },
+
+        // 185
+        { q:"Choisis la réponse qui n’a pas de forme fixe", a:["nuage","chocolat","monde","l'eau"], c:"nuage", exp:"Un nuage change constamment de forme, contrairement aux objets solides." },
+
+        // 186
+        { q:"Quel mot dépend entièrement de l’observateur ?", a:["beau","apprécier","comportement","déclaration"], c:"beau", exp:"La beauté dépend du regard et de la perception de l’observateur." },
+
+        // 187
+        { q:"Clique sur la réponse qui n’existe que si définie", a:["concept","faux","abservation","payer"], c:"concept", exp:"Un concept n’existe que lorsqu’il est défini par l’esprit." },
+
+        // 188
+        { q:"Choisis la réponse qui dépend d’un système", a:["règle","air","eau","feu"], c:"règle", exp:"Une règle est créée par un système humain, contrairement aux éléments naturels." },
+
+        // 189
+        { q:"Quel mot est une pure relation ?", a:["entre","collaborer","tout","a peu prés"], c:"entre", exp:"Le mot 'entre' exprime une relation, pas un objet." },
+
+        // 190
+        { q:"Clique sur la réponse qui dépend uniquement de l’interprétation", a:["sens","question","reponse","imposer"], c:"sens", exp:"Le 'sens' varie selon l’interprétation, contrairement aux objets physiques." },
+
+        // 191
+        { q:"Clique sur le bouton bleu", a:["Bouton bleu écrit","Bouton bleu"," ","Aucun bouton bleu"], c:" ", exp:"Le 'bouton bleu vide' est le vrai bouton." }
+    ];
+
+    let currentLevel=1;
+    let correctCount=0;
+    let used=[]; let current;
+
+    function randomLevel(){
+      let i;
+      do{i=Math.floor(Math.random()*levels.length);}while(used.includes(i));
+      used.push(i);
+      return levels[i];
+    }
+
+    function loadLevelData(){
+      current=randomLevel();
+      document.getElementById("level").innerText="Niveau "+currentLevel;
+      document.getElementById("question").innerText=current.q;
+      let box=document.getElementById("answers");
+      box.innerHTML="";
+      current.a.forEach(a=>{
+        let b=document.createElement("button");
+        b.innerText=a;
+        b.onclick=()=>checkAnswer(a);
+        box.appendChild(b);
+      });
+    }
+
+    function checkAnswer(ans){
+        // Désactiver tous les boutons dès qu'une réponse est choisie
+      let buttons = document.querySelectorAll("#answers button");
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.6"; // style visuel pour montrer qu'ils sont désactivés
+        btn.style.cursor = "not-allowed";
+      });
+      if(ans===current.c){
+        correctCount++;
+        showFeedback("🎉 Bravo. Félicitations vous avez trouvé la bonne réponse",true);
+        launchConfetti();
+        playSound(winSound); // 🔊 jouer son de victoire
+        document.getElementById("nextBtn").style.display="block";
+      }else{
+        showFeedback("❌ Mauvaise réponse\nRéponse: "+current.c+"\n"+current.exp,false);
+        playSound(loseSound); // 🔊 jouer son d’échec
+        document.getElementById("nextBtn").style.display="block";
+      }
+    }
+
+    function showFeedback(msg,ok){
+      let f=document.getElementById("feedback");
+      f.innerText=msg;
+      f.className=ok?"success":"error";
+    }
+
+    document.getElementById("nextBtn").onclick=()=>{
+      currentLevel++;
+      if(currentLevel===10||currentLevel===20){
+        playSound(diploSound); // 🔊 jouer le son du diplôme
+        document.getElementById("certificateModal").style.display="block";
+      }else{
+        loadLevelData();
+        document.getElementById("nextBtn").style.display="none";
+      }
+    };
+
+    function generateCertificate(){
+      let name=document.getElementById("playerName").value||"Joueur";
+      let score=correctCount+"/"+currentLevel;
+      let ratio=correctCount/currentLevel;
+      let message="";
+
+      if(ratio>=0.9) message="🌟 Génie absolu ! Ton cerveau est une arme secrète.";
+      else if(ratio>=0.7) message="👏 Très intelligent, continue comme ça !";
+      else if(ratio>=0.5) message="🙂 Pas mal, mais tu peux faire mieux.";
+      else if(ratio>=0.3) message="😅 Oups… ton cerveau a besoin d’un café.";
+      else message="🙈 Très insuffisant… mais courage, même les génies ont commencé par se tromper !";
+
+      let diplomaHTML=`
+        <h2>🎓 Diplôme Trick Brain</h2>
+        <p><strong>Nom :</strong> ${name}</p>
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Lion" style="width:80px;height:80px;margin:10px;" crossorigin="anonymous">
+        <p><strong>Score :</strong> ${score}</p>
+        <p>${message}</p>
+        <div class="diploma-buttons">
+          <button onclick="saveDiploma()">💾 Enregistrer</button>
+          <button onclick="shareDiploma()">📤 Partager</button>
+          <button onclick="continueGame()">▶️ Continuer</button>
+        </div>
+      `;
+      document.getElementById("diplomaContent").innerHTML=diplomaHTML;
+      document.getElementById("certificateModal").style.display="none";
+      document.getElementById("diplomaModal").style.display="block";
+
+      launchConfetti(); // 🎉 confettis au moment du diplôme
+    }
+
+    // 🎉 Confettis
+    function launchConfetti() {
+      const duration = 2 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 }
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      })();
+    }
+    // 💾 Enregistrer le diplôme en image
+    // 💾 Enregistrer le diplôme en image bien nette
+    function saveDiploma(){
+      html2canvas(document.querySelector("#diplomaContent"), {
+        useCORS: true,       // permet de charger correctement les images externes
+        scale: 3,            // augmente la résolution pour plus de netteté
+        backgroundColor: "#ffffff" // fond blanc pour un rendu clair
+      }).then(canvas=>{
+        let link = document.createElement("a");
+        link.download = "Diplome_TrickBrain.png";
+        link.href = canvas.toDataURL("image/png", 1.0); // qualité maximale
+        link.click();
+      });
+    }
+
+    // 📤 Partager le diplôme en image
+    function shareDiploma(){
+      html2canvas(document.querySelector("#diplomaContent")).then(canvas=>{
+        let dataUrl=canvas.toDataURL();
+        // WhatsApp ne supporte pas directement l'image en base64, on partage un texte + lien
+        let txt="🎓 Voici mon diplôme Trick Brain ! Score: "+correctCount+"/"+currentLevel;
+        window.open("https://wa.me/?text="+encodeURIComponent(txt));
+      });
+    }
+
+    // ▶️ Continuer le jeu
+    function continueGame(){
+      document.getElementById("diplomaModal").style.display="none";
+      loadLevelData();
+      document.getElementById("nextBtn").style.display="none";
+    }
+
+    window.onload=()=>{
+      loadLevelData();
+      document.getElementById("shareBtn").onclick=()=>{
+        let txt="😏 Teste ton cerveau avec Trick Brain ! "+location.href;
+        window.open("https://wa.me/?text="+encodeURIComponent(txt));
+      };
+      // Ajout d’un son sur tous les boutons
+      document.querySelectorAll("button").forEach(btn=>{
+        btn.addEventListener("click", ()=>playSound(clickSound));
+      });
+    };
+
+    let soundEnabled = true;
+
+    // Ouvrir la modale paramètres
+    document.getElementById("settingsBtn").onclick = () => {
+      document.getElementById("settingsModal").style.display = "block";
+    };
+
+    // Fermer la modale
+    function closeSettings(){
+      document.getElementById("settingsModal").style.display = "none";
+    }
+
+    // Copier le lien du jeu
+    function copyGameLink(){
+      navigator.clipboard.writeText(location.href).then(()=>{
+        alert("📋 Lien du jeu copié !");
+      });
+    }
+
+    // Activer/désactiver le son avec icône
+    document.getElementById("soundToggleBtn").onclick = () => {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById("soundToggleBtn");
+      if(soundEnabled){
+        btn.innerText = "🔊 Son activé";
+      }else{
+        btn.innerText = "🔇 Son désactivé";
+      }
+    };
+
+    // Fonction pour jouer un son uniquement si activé
+    function playSound(audio){
+      if(soundEnabled){
+        audio.currentTime = 0;
+        audio.play();
+      }
+    }
+  </script>
+</body>
+</html>
