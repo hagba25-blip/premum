@@ -1120,9 +1120,24 @@
 
     window.onload=()=>{
       loadLevelData();
-      document.getElementById("shareBtn").onclick=()=>{
-        let txt="😏 Teste ton cerveau avec Trick Brain ! "+location.href;
-        window.open("https://wa.me/?text="+encodeURIComponent(txt));
+      document.getElementById("shareBtn").onclick = async () => {
+        let txt = "😏 Teste ton cerveau avec Trick Brain ! " + location.href;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Trick Brain",
+              text: txt,
+              url: location.href
+            });
+            console.log("Partage réussi !");
+          } catch (err) {
+            console.error("Erreur lors du partage :", err);
+          }
+        } else {
+          // Fallback si l’API n’est pas supportée
+          alert("partage impossible. Copie le lien : " + txt);
+        }
       };
       // Ajout d’un son sur tous les boutons
       document.querySelectorAll("button").forEach(btn=>{
