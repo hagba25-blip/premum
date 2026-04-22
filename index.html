@@ -1021,11 +1021,11 @@
     }
 
     document.getElementById("nextBtn").onclick=()=>{
+      currentLevel++;
       if(currentLevel % 10 === 0){
         playSound(diploSound); // 🔊 jouer le son du diplôme
         document.getElementById("certificateModal").style.display="block";
       }else{
-        currentLevel++;
         loadLevelData();
         document.getElementById("nextBtn").style.display="none";
       }
